@@ -65,8 +65,8 @@ def by_date(dirpath:Path,isdry:bool):
 
     # process 
     for file in dirpath.iterdir():
-        # only files
-        if not file.is_file():
+        # only files or not a symlink
+        if not file.is_file() or file.is_symlink():
             continue
         # ignore code files
         if file.name in IGNORE_FILES:

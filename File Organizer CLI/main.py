@@ -1,6 +1,7 @@
 import argparse
 from pathlib import Path
 import grp_ext
+import grp_date
 
 parser = argparse.ArgumentParser(
     prog='File Organizer CLI',
@@ -42,3 +43,6 @@ if __name__ == '__main__':
 
     if args.group_by_ext:
         grp_ext.by_ext(args.directory, args.dry_run)
+    
+    if args.group_by_date:
+        grp_date.by_date(args.directory, args.dry_run)
