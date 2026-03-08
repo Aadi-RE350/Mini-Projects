@@ -1,13 +1,10 @@
 import shutil
 from pathlib import Path
 import json
-from dotenv import load_dotenv
 import os
 from datetime import datetime
 
-load_dotenv()
 
-IGNORE_FILES = {f.strip() for f in os.getenv("IGNORE_FILES","").split(",") if f}
 
 def load_moves(logfile:Path)->list:
     if logfile.exists():
@@ -46,7 +43,8 @@ def process_file(file:Path,dirpath:Path,moves:list,is_dry:bool)->tuple[int,int]:
             "des": str(des_path)
         })
         des_dir.mkdir(parents=True,exist_ok=True)
-        shutil.copy2(file,des_path) #only for testing
+        shutil.move(file,des_path) 
+        print(f"Moved {file} -> {des_path}")
     else:
         print(f"[DRY RUN] {file} -> {des_path}")
     return 1,0
@@ -56,12 +54,12 @@ def save_moves(logfile:Path,moves:list):
     with open(logfile,'w') as f:
         json.dump(moves,f,indent=4)
 
-def by_date(dirpath:Path,is_dry:bool):
+def by_date(dirpath:Path,is_dry:bool,LOGFILE:str,IGNORE_FILES:set):
     if not dirpath.is_dir():
         raise ValueError('Argument provided must be a directory')
     
     # load moves
-    logfile = dirpath / 'moves.json'
+    logfile = dirpath / LOGFILE
     moves = load_moves(logfile)
 
     skipped = 0
@@ -84,5 +82,6 @@ def by_date(dirpath:Path,is_dry:bool):
 
 
 if __name__ == "__main__":
-    by_date(Path('.'),False)
+    dirpath = Path.cwd()
+    by_date(dirpath,True,'moves.json',set())
 

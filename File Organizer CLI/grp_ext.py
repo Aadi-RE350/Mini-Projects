@@ -3,11 +3,7 @@ import shutil
 import mimetypes
 import json
 from dotenv import load_dotenv
-import os
 
-load_dotenv()
-
-IGNORE_FILES = {f.strip() for f in os.getenv("IGNORE_FILES","").split(",") if f}
 
 def load_moves(log_file:Path)->list:
     if log_file.exists():
@@ -41,7 +37,8 @@ def process_file(file:Path,dirpath:Path,moves:list,is_dry:bool)->tuple[int,int]:
             "des": str(des_path)
         })
         des_dir.mkdir(parents=True,exist_ok=True)
-        shutil.copy2(file,des_path)
+        shutil.move(file,des_path)
+        print(f"Moved {file} -> {des_path}")
     else:
         print(f"[DRY RUN] {file} -> {des_path}")
     return 1,0
@@ -50,11 +47,11 @@ def save_moves(log_file:Path,moves:list):
     with open(log_file,'w') as f:
         json.dump(moves,f,indent=4)
 
-def by_ext(dirpath:Path,is_dry:bool):
+def by_ext(dirpath:Path,is_dry:bool,LOGFILE:str,IGNORE_FILES:set):
     if not dirpath.is_dir():
         raise ValueError('Argument provided is not a directory')
 
-    log_file = dirpath / 'moves.json'
+    log_file = dirpath / LOGFILE
     moves = load_moves(log_file)
 
     skipped = 0
@@ -75,5 +72,5 @@ def by_ext(dirpath:Path,is_dry:bool):
 
 
 if __name__ == "__main__":
-    dirpath = Path('./')
-    by_ext(dirpath,True)
+    dirpath = Path.cwd()
+    by_ext(dirpath,False,'moves.json',set())
